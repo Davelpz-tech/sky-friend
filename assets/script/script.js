@@ -101,3 +101,95 @@ function showMain(event){
         }
     })
 
+    function createHistoryBtn(){
+        if(inputValue.value){
+            events.push({
+                time: now,
+                city: inputValue.value
+            });
+        }
+    
+        localStorage.setItem('events', JSON.stringify(events));
+        historyBtnEl = document.createElement('button')
+        historyBtnEl.setAttribute('id', 'historyBtn')
+        historyBtnEl.classList.add('historyBtn')
+        historyBtnEl.innerText = events[counter].city
+        counter ++
+        historyBtnEl.addEventListener('click', showMainBtn)
+        historyEl.appendChild(historyBtnEl)
+
+        console.log(events.length)
+        
+    }
+
+    createHistoryBtn()
+    // localStorage.setItem('city', JSON.stringify(inputValue.value))
+    // historyEl.innerHTML = `<button id="historyBtn">${inputValue.value}</button>`
+    formEl.reset();
+
+    const deleteBtn = document.querySelector('#deleteBtn')
+    deleteBtn.addEventListener('click', deleteLocalStorage)
+    
+    function deleteLocalStorage() {
+        localStorage.removeItem('events');
+        location.reload();
+    }
+    
+}
+
+
+
+function showMainBtn(event){
+    const extract = event.target
+    console.log(historyBtnEl.innerText)
+    event.preventDefault()
+    fetch('http://api.openweathermap.org/data/2.5/weather?q='+extract.innerText+'&units=imperial&appid=81e91fb82b9682435a7015e6eb108987')
+    .then(Response => Response.json())
+    .then(data => {
+        var longitude = data['coord']['lon']
+        var latitude = data['coord']['lat']
+        var nameValue = data['name']
+        var tempValue = data['main']['temp']
+        var humidValue = data['main']['humidity']
+        var windValue = data['wind']['speed']
+        var weatherIconValue = data['weather'][0]['icon']
+
+        cityName.innerHTML = nameValue
+        dateEl.innerHTML = days[day] + ' ' + months[month] + ' ' + date + ' ' + ' '  + year
+        temp.innerHTML = 'Temperature: ' + tempValue + '&#176'
+        humid.innerHTML = 'Humidity: ' + humidValue
+        wind.innerHTML = 'Wind Speed: ' + windValue + 'mph'
+        weatherIcon.innerHTML = `<img src="http://openweathermap.org/img/wn/${weatherIconValue}@2x.png" class="weather-icon" alt="">`
+
+        console.log(data)
+        // get weather from second API
+        function getWeather(){
+            fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,minutely&units=imperial&appid=${API_KEY}`).then(res => res.json().then(data => {
+                console.log(data)
+                showWeatherData(data);
+            }))
+        }
+        getWeather();
+        // create weather divs from API day data
+        function showWeatherData(data){
+            let fiveDayForecast = ""
+            data.daily.forEach((day, index) => {
+                if(index < 5){
+                    fiveDayForecast += `
+                    <div class="five-day-items">
+                        <div class="forecast-item">
+                            <h4 class="date">${window.moment(day.dt*1000).format('ddd')}</h4>
+                            <img src="http://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png">
+                            <div class="card-line"></div>
+                            <p class="temp">Temp: ${day.temp.day}&#176</p>
+                            <p class="wind">Wind: ${day.wind_speed}mph</p>
+                            <p class="humidity">Humidity: ${day.humidity}</p>
+                        </div>
+                    </div>
+                    ` 
+                }
+            })
+        weatherForecastDiv.innerHTML = fiveDayForecast;
+        }
+    })
+}
