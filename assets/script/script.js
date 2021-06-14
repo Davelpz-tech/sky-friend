@@ -100,3 +100,4 @@ function showMain(event){
         weatherForecastDiv.innerHTML = fiveDayForecast;
         }
     })
+
