@@ -181,3 +181,17 @@ input:focus {
     border-radius: 15px;
     padding: 5px;
 }
+
+.moderate {
+    background-color: var(--yelow);
+    color: var(--dark-bg);
+    border-radius: 15px;
+    padding: 5px;
+}
+
+.unfavorable {
+    background-color: var(--pink);
+    color: var(--dark-bg);
+    border-radius: 15px;
+    padding: 5px;
+}
